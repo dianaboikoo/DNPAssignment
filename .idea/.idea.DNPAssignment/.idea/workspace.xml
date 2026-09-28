@@ -8,23 +8,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cff3de0a-e3c7-443b-a5c1-419b505583da" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Server/CLI/CLI.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/Program.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/CliApp.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManageComments/CreateCommentView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManageComments/ListCommentView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManageComments/ManageCommentsView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManagePosts/CreatePostView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManagePosts/ListPostsView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManagePosts/ManagePostsView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManagePosts/SinglePostView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManageUsers/CreateUserView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManageUsers/ListUsersView.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Server/CLI/UI/ManageUsers/ManageUsersView.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Server/FileRepositories/CommentFileRepository.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Server/FileRepositories/FileRepositories.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Server/FileRepositories/PostFileRepository.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Server/FileRepositories/UserFileRepository.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DNPAssignment/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DNPAssignment/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DNPAssignment.sln" beforeDir="false" afterPath="$PROJECT_DIR$/DNPAssignment.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/InMemoryRepositories/PostInMemoryRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/InMemoryRepositories/PostInMemoryRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/InMemoryRepositories/UserInMemoryRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/InMemoryRepositories/UserInMemoryRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/CLI/CLI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Server/CLI/CLI.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/CLI/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/CLI/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/CLI/UI/ManageComments/CreateCommentView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/CLI/UI/ManageComments/CreateCommentView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/CLI/UI/ManageComments/ManageCommentsView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/CLI/UI/ManageComments/ManageCommentsView.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,21 +30,20 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "dianaboikoo"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;dianaboikoo&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/dianaboikoo/DNPAssignment.git",
-    "accountId": "2ef2ec25-6ea7-4d41-bb5a-4e494d79f74b"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/dianaboikoo/DNPAssignment.git&quot;,
+    &quot;accountId&quot;: &quot;2ef2ec25-6ea7-4d41-bb5a-4e494d79f74b&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Server/CLI/UI/CliApp.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Server/CLI/UI/Comments/ManageComments.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/CLI/UI/ManageComments/CreateCommentView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/CLI/UI/ManageComments/ListCommentView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/CLI/UI/ManagePosts/CreatePostView.cs" root0="FORCE_HIGHLIGHTING" />
@@ -59,11 +51,12 @@
     <setting file="file://$PROJECT_DIR$/Server/CLI/UI/ManagePosts/SinglePostView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/CLI/UI/ManageUsers/CreateUserView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/CLI/UI/ManageUsers/ListUsersView.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Server/CLI/UI/Posts/ManagePostsView.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Server/CLI/UI/Users/ManageUsersView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/Entities/Comment.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/Entities/Post.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/Entities/User.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Server/FileRepositories/CommentFileRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Server/FileRepositories/PostFileRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Server/FileRepositories/UserFileRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/InMemoryRepositories/CommentInMemoryRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/InMemoryRepositories/PostinMemoryRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Server/InMemoryRepositories/UserInMemoryRepository.cs" root0="FORCE_HIGHLIGHTING" />
@@ -84,25 +77,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Project.CLI.executor": "Run",
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "cidr.known.project.marker": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Project.CLI.executor&quot;: &quot;Run&quot;,
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="CLI" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />

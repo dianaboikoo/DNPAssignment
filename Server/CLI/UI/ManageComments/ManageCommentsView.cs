@@ -32,8 +32,7 @@ public class ManageCommentsView
             switch (choice)
             {
                 case "1":
-                    CreateCommentView createCommentView =
-                        new CreateCommentView(commentRepository, postRepository, userRepository);
+                    CreateCommentView createCommentView = new CreateCommentView(commentRepository, postRepository, userRepository);
                     await createCommentView.ShowAsync();
                     break;
                 case "2":
@@ -44,7 +43,7 @@ public class ManageCommentsView
                     }
                     else
                     {
-                        Console.WriteLine("Invalid ID.");
+                        Console.WriteLine("Invalid ID");
                     }
                     break;
                 case "3":
@@ -54,7 +53,7 @@ public class ManageCommentsView
                     back = true;
                     break;
                 default:
-                    Console.WriteLine("Invalid option, try again.");
+                    Console.WriteLine("No an option, try again.");
                     break;
             }
         }

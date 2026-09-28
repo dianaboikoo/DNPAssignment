@@ -22,7 +22,7 @@ public class CreateCommentView
         Console.Write("Enter post ID: ");
         if (!int.TryParse(Console.ReadLine(), out int postId))
         {
-            Console.WriteLine("Invalid post ID.");
+            Console.WriteLine("Invalid post ID");
             return;
         }
 
