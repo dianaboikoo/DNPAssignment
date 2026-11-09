@@ -1,0 +1,210 @@
+@page "/posts/{Id:int}"
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject NavigationManager NavMgr
+
+<PageTitle>@(post?.Title ?? "Post")</PageTitle>
+
+@if (!string.IsNullOrEmpty(errorLabel))
+{
+    <p class="error">@errorLabel</p>
+}
+
+@if (post is null)
+{
+    if (string.IsNullOrEmpty(errorLabel))
+    {
+        <p class="muted">Loading...</p>
+    }
+}
+else
+{
+    if (isEditing)
+    {
+        <div class="card form">
+            <label>Title:</label>
+            <input type="text" @bind="editTitle"/>
+            <label>Body:</label>
+            <textarea rows="6" @bind="editBody"></textarea>
+            <div class="button-row">
+                <button @onclick="SaveEditAsync">Save</button>
+                <button class="btn-secondary" @onclick="() => isEditing = false">Cancel</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h1>@post.Title</h1>
+        <p class="muted">by @post.AuthorUserName</p>
+        <div class="card post-body">@post.Body</div>
+
+        if (userId == post.UserId)
+        {
+            <div class="button-row">
+                <button class="btn-secondary" @onclick="StartEdit">Edit post</button>
+                <button class="btn-danger" @onclick="DeletePostAsync">Delete post</button>
+            </div>
+        }
+    }
+
+    <h2>Comments (@(post.Comments?.Count ?? 0))</h2>
+
+    if (post.Comments is null || post.Comments.Count == 0)
+    {
+        <p class="muted">No comments yet.</p>
+    }
+    else
+    {
+        <ul class="comment-list">
+            @foreach (CommentDto comment in post.Comments)
+            {
+                <li class="card">
+                    <p class="comment-author">@comment.AuthorUserName</p>
+                    <p class="post-body">@comment.Body</p>
+                    @if (userId == comment.UserId)
+                    {
+                        <button class="btn-small btn-danger" @onclick="() => DeleteCommentAsync(comment.Id)">Delete</button>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    if (userId is not null)
+    {
+        <div class="card form">
+            <label>Add a comment:</label>
+            <textarea rows="3" @bind="newComment"></textarea>
+            @if (!string.IsNullOrEmpty(commentError))
+            {
+                <p class="error">@commentError</p>
+            }
+            <button @onclick="AddCommentAsync">Add comment</button>
+        </div>
+    }
+    else
+    {
+        <p class="muted"><a href="login">Log in</a> to write a comment.</p>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; } = null!;
+
+    private PostDto? post;
+    private int? userId;
+    private string errorLabel = "";
+
+    private string newComment = "";
+    private string commentError = "";
+
+    private bool isEditing;
+    private string editTitle = "";
+    private string editBody = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        AuthenticationState authState = await State;
+        userId = authState.User.GetUserId();
+
+        if (post is null || post.Id != Id)
+        {
+            await LoadPostAsync();
+        }
+    }
+
+    private async Task LoadPostAsync()
+    {
+        errorLabel = "";
+        try
+        {
+            post = await PostService.GetPostAsync(Id, includeComments: true);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+
+    private async Task AddCommentAsync()
+    {
+        commentError = "";
+        if (userId is null)
+        {
+            commentError = "You must be logged in to comment.";
+            return;
+        }
+
+        try
+        {
+            await PostService.AddCommentAsync(Id, new CreateCommentDto
+            {
+                Body = newComment,
+                UserId = userId.Value
+            });
+            newComment = "";
+            await LoadPostAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            commentError = $"Error: {e.Message}";
+        }
+    }
+
+    private async Task DeleteCommentAsync(int commentId)
+    {
+        try
+        {
+            await CommentService.DeleteCommentAsync(commentId);
+            await LoadPostAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+
+    private void StartEdit()
+    {
+        editTitle = post!.Title;
+        editBody = post.Body;
+        isEditing = true;
+    }
+
+    private async Task SaveEditAsync()
+    {
+        try
+        {
+            await PostService.UpdatePostAsync(Id, new UpdatePostDto
+            {
+                Title = editTitle,
+                Body = editBody
+            });
+            isEditing = false;
+            await LoadPostAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+
+    private async Task DeletePostAsync()
+    {
+        try
+        {
+            await PostService.DeletePostAsync(Id);
+            NavMgr.NavigateTo("posts");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+}

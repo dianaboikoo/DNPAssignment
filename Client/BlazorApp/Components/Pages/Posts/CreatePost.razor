@@ -1,0 +1,66 @@
+@page "/posts/create"
+@inject IPostService PostService
+@inject NavigationManager NavMgr
+
+<PageTitle>Create post</PageTitle>
+
+<h1>Create post</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="card form">
+            <label>Title:</label>
+            <input type="text" @bind="title"/>
+
+            <label>Body:</label>
+            <textarea rows="6" @bind="body"></textarea>
+
+            @if (!string.IsNullOrEmpty(errorLabel))
+            {
+                <p class="error">@errorLabel</p>
+            }
+
+            <button @onclick="CreateAsync">Create post</button>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>You must log in to create a post.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; } = null!;
+
+    private string title = "";
+    private string body = "";
+    private string errorLabel = "";
+
+    private async Task CreateAsync()
+    {
+        errorLabel = "";
+
+        AuthenticationState authState = await State;
+        int? userId = authState.User.GetUserId();
+        if (userId is null)
+        {
+            errorLabel = "You must be logged in to create a post";
+            return;
+        }
+
+        try
+        {
+            PostDto created = await PostService.CreatePostAsync(new CreatePostDto
+            {
+                Title = title,
+                Body = body,
+                UserId = userId.Value
+            });
+            NavMgr.NavigateTo($"posts/{created.Id}");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+}

@@ -1,6 +1,25 @@
 @WebAPI_HostAddress = http://localhost:5169
 
-GET {{WebAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. Create a user
+POST http://localhost:5169/users
+Content-Type: application/json
 
-###
+{ "userName": "diana", "password": "1234" }
+
+### 2. Log in with the correct password 
+POST http://localhost:5169/auth/login
+Content-Type: application/json
+
+{ "userName": "diana", "password": "1234" }
+
+### 3. Log in with a wrong password
+POST http://localhost:5169/auth/login
+Content-Type: application/json
+
+{ "userName": "diana", "password": "wrong" }
+
+### 4. Log in with a user that doesn't exist
+POST http://localhost:5169/auth/login
+Content-Type: application/json
+
+{ "userName": "nobody", "password": "1234" }

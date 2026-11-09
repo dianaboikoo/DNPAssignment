@@ -19,7 +19,7 @@ public class UserFileRepository : IUserRepository
     public async Task<User> AddAsync(User user)
     {
         List<User> users = await LoadUsersAsync();
-        int maxId = users.Count > 0 ? users.Max(u => u.Id) : 1;
+        int maxId = users.Count > 0 ? users.Max(u => u.Id) : 0;
         user.Id = maxId + 1;
         users.Add(user);
         await SaveUsersAsync(users);

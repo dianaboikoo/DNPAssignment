@@ -1,0 +1,32 @@
+POST http://localhost:5169/auth/login
+Content-Type: application/json
+
+{ "userName": "nobody", "password": "1234" }
+
+<> 2026-11-09T103016.401.txt
+
+###
+POST http://localhost:5169/auth/login
+Content-Type: application/json
+
+{ "userName": "diana", "password": "wrong" }
+
+<> 2026-11-09T103009.401.txt
+
+###
+POST http://localhost:5169/auth/login
+Content-Type: application/json
+
+{ "userName": "diana", "password": "1234" }
+
+<> 2026-11-09T103003.200.json
+
+###
+POST http://localhost:5169/users
+Content-Type: application/json
+
+{ "userName": "diana", "password": "1234" }
+
+<> 2026-11-09T102957.201.json
+
+###

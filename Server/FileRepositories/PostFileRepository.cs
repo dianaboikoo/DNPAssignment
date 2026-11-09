@@ -19,7 +19,7 @@ public class PostFileRepository : IPostRepository
     public async Task<Post> AddAsync(Post post)
     {
         List<Post> posts = await LoadPostsAsync();
-        int maxId = posts.Count > 0 ? posts.Max(p => p.Id) : 1;
+        int maxId = posts.Count > 0 ? posts.Max(p => p.Id) : 0;
         post.Id = maxId + 1;
         posts.Add(post);
         await SavePostsAsync(posts);
