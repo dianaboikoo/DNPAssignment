@@ -1,6 +1,7 @@
 using DTOs;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebAPI.Controllers;
@@ -19,15 +20,14 @@ public class PostsController : ControllerBase
         this.userRepo = userRepo;
         this.commentRepo = commentRepo;
     }
-    
+
     [HttpGet]
-    public ActionResult<IEnumerable<PostDto>> GetPosts(
+    public async Task<ActionResult<IEnumerable<PostDto>>> GetPosts(
         [FromQuery] string? title,
         [FromQuery] int? userId,
         [FromQuery] string? userName)
     {
         IQueryable<Post> posts = postRepo.GetMany();
-        Dictionary<int, string> userNames = GetUserNames();
 
         if (!string.IsNullOrWhiteSpace(title))
             posts = posts.Where(p => p.Title.ToLower().Contains(title.ToLower()));
@@ -36,19 +36,18 @@ public class PostsController : ControllerBase
             posts = posts.Where(p => p.UserId == userId);
 
         if (!string.IsNullOrWhiteSpace(userName))
-        {
-            List<int> matchingUserIds = userNames
-                .Where(u => u.Value.ToLower().Contains(userName.ToLower()))
-                .Select(u => u.Key)
-                .ToList();
+            posts = posts.Where(p => p.User.UserName.ToLower().Contains(userName.ToLower()));
 
-            posts = posts.Where(p => matchingUserIds.Contains(p.UserId));
-        }
-
-        List<PostDto> result = posts
-            .ToList()
-            .Select(p => ToPostDto(p, userNames))
-            .ToList();
+        List<PostDto> result = await posts
+            .Select(p => new PostDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Body = p.Body,
+                UserId = p.UserId,
+                AuthorUserName = p.User.UserName
+            })
+            .ToListAsync();
 
         return Ok(result);
     }
@@ -56,34 +55,43 @@ public class PostsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<PostDto>> GetPost(int id, [FromQuery] bool includeComments = false)
     {
-        try
-        {
-            Post post = await postRepo.GetSingleAsync(id);
-            Dictionary<int, string> userNames = GetUserNames();
-
-            PostDto dto = ToPostDto(post, userNames);
-
-            if (includeComments)
+        PostDto? dto = await postRepo.GetMany()
+            .Where(p => p.Id == id)
+            .Select(p => new PostDto
             {
-                dto.Comments = commentRepo.GetMany()
-                    .Where(c => c.PostId == id)
-                    .ToList()
-                    .Select(c => ToCommentDto(c, userNames))
-                    .ToList();
-            }
+                Id = p.Id,
+                Title = p.Title,
+                Body = p.Body,
+                UserId = p.UserId,
+                AuthorUserName = p.User.UserName
+            })
+            .FirstOrDefaultAsync();
 
-            return Ok(dto);
-        }
-        catch (InvalidOperationException e)
+        if (dto == null)
+            return NotFound($"Post with id {id} not found");
+
+        if (includeComments)
         {
-            return NotFound(e.Message);
+            dto.Comments = await commentRepo.GetMany()
+                .Where(c => c.PostId == id)
+                .Select(c => new CommentDto
+                {
+                    Id = c.Id,
+                    Body = c.Body,
+                    UserId = c.UserId,
+                    PostId = c.PostId,
+                    AuthorUserName = c.User.UserName
+                })
+                .ToListAsync();
         }
+
+        return Ok(dto);
     }
 
     [HttpPost]
     public async Task<ActionResult<PostDto>> CreatePost([FromBody] CreatePostDto postDto)
     {
-        User? author = userRepo.GetMany().FirstOrDefault(u => u.Id == postDto.UserId);
+        User? author = await userRepo.GetMany().FirstOrDefaultAsync(u => u.Id == postDto.UserId);
         if (author is null)
             return BadRequest($"User with id {postDto.UserId} does not exist");
 
@@ -124,11 +132,6 @@ public class PostsController : ControllerBase
         try
         {
             await postRepo.DeleteAsync(id);
-
-            List<Comment> comments = commentRepo.GetMany().Where(c => c.PostId == id).ToList();
-            foreach (Comment comment in comments)
-                await commentRepo.DeleteAsync(comment.Id);
-
             return NoContent();
         }
         catch (InvalidOperationException e)
@@ -137,20 +140,14 @@ public class PostsController : ControllerBase
         }
     }
 
-
     [HttpPost("{id:int}/comments")]
     public async Task<ActionResult<CommentDto>> AddComment(int id, [FromBody] CreateCommentDto commentDto)
     {
-        try
-        {
-            await postRepo.GetSingleAsync(id);  
-        }
-        catch (InvalidOperationException e)
-        {
-            return NotFound(e.Message);
-        }
+        bool postExists = await postRepo.GetMany().AnyAsync(p => p.Id == id);
+        if (!postExists)
+            return NotFound($"Post with id {id} not found");
 
-        User? author = userRepo.GetMany().FirstOrDefault(u => u.Id == commentDto.UserId);
+        User? author = await userRepo.GetMany().FirstOrDefaultAsync(u => u.Id == commentDto.UserId);
         if (author is null)
             return BadRequest($"User with id {commentDto.UserId} does not exist");
 
@@ -171,53 +168,22 @@ public class PostsController : ControllerBase
     [HttpGet("{id:int}/comments")]
     public async Task<ActionResult<IEnumerable<CommentDto>>> GetCommentsOfPost(int id)
     {
-        try
-        {
-            await postRepo.GetSingleAsync(id);
-        }
-        catch (InvalidOperationException e)
-        {
-            return NotFound(e.Message);
-        }
+        bool postExists = await postRepo.GetMany().AnyAsync(p => p.Id == id);
+        if (!postExists)
+            return NotFound($"Post with id {id} not found");
 
-        Dictionary<int, string> userNames = GetUserNames();
-
-        List<CommentDto> result = commentRepo.GetMany()
+        List<CommentDto> result = await commentRepo.GetMany()
             .Where(c => c.PostId == id)
-            .ToList()
-            .Select(c => ToCommentDto(c, userNames))
-            .ToList();
+            .Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Body = c.Body,
+                UserId = c.UserId,
+                PostId = c.PostId,
+                AuthorUserName = c.User.UserName
+            })
+            .ToListAsync();
 
         return Ok(result);
-    }
-
-
-    private Dictionary<int, string> GetUserNames()
-    {
-        return userRepo.GetMany().ToDictionary(u => u.Id, u => u.UserName);
-    }
-
-    private static PostDto ToPostDto(Post p, Dictionary<int, string> userNames)
-    {
-        return new PostDto
-        {
-            Id = p.Id,
-            Title = p.Title,
-            Body = p.Body,
-            UserId = p.UserId,
-            AuthorUserName = userNames.GetValueOrDefault(p.UserId, "Unknown")
-        };
-    }
-
-    private static CommentDto ToCommentDto(Comment c, Dictionary<int, string> userNames)
-    {
-        return new CommentDto
-        {
-            Id = c.Id,
-            Body = c.Body,
-            UserId = c.UserId,
-            PostId = c.PostId,
-            AuthorUserName = userNames.GetValueOrDefault(c.UserId, "Unknown")
-        };
     }
 }

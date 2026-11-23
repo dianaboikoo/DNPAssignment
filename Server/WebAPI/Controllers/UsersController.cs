@@ -1,15 +1,14 @@
 using DTOs;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebAPI.Controllers;
 
-
 [ApiController]
 [Route("users")]
-
-public class UsersController:ControllerBase
+public class UsersController : ControllerBase
 {
     private readonly IUserRepository userRepo;
 
@@ -17,19 +16,19 @@ public class UsersController:ControllerBase
     {
         this.userRepo = userRepo;
     }
-    
+
     [HttpGet]
-    public ActionResult<IEnumerable<UserDto>> GetMany([FromQuery] string? userName)
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetMany([FromQuery] string? userName)
     {
         IQueryable<User> users = userRepo.GetMany();
-        
+
         if (!string.IsNullOrWhiteSpace(userName))
             users = users.Where(u => u.UserName.ToLower().Contains(userName.ToLower()));
 
-        List<UserDto> result = users
+        List<UserDto> result = await users
             .Select(u => new UserDto { Id = u.Id, UserName = u.UserName })
-            .ToList();
-        
+            .ToListAsync();
+
         return Ok(result);
     }
 
@@ -45,23 +44,21 @@ public class UsersController:ControllerBase
         {
             return NotFound(e.Message);
         }
-       
     }
 
     [HttpPost]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto userDto)
     {
-        bool taken = userRepo.GetMany()
-            .Any(u => u.UserName.ToLower() == userDto.UserName.ToLower());
+        bool taken = await userRepo.GetMany()
+            .AnyAsync(u => u.UserName.ToLower() == userDto.UserName.ToLower());
         if (taken)
-            return Conflict($"Username '{userDto.UserName}' is already taken");  
+            return Conflict($"Username '{userDto.UserName}' is already taken");
 
         User user = new User { UserName = userDto.UserName, Password = userDto.Password };
         User created = await userRepo.AddAsync(user);
 
         UserDto dto = new UserDto { Id = created.Id, UserName = created.UserName };
-        return Created($"/users/{dto.Id}", dto);  
-
+        return Created($"/users/{dto.Id}", dto);
     }
 
     [HttpPut("{id:int}")]
@@ -73,8 +70,8 @@ public class UsersController:ControllerBase
 
             if (user.UserName.ToLower() != userDto.UserName.ToLower())
             {
-                bool taken = userRepo.GetMany()
-                    .Any(u => u.UserName.ToLower() == userDto.UserName.ToLower());
+                bool taken = await userRepo.GetMany()
+                    .AnyAsync(u => u.UserName.ToLower() == userDto.UserName.ToLower());
                 if (taken)
                     return Conflict($"Username '{userDto.UserName}' is already taken");
             }

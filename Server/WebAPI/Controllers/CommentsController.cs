@@ -1,6 +1,7 @@
 using DTOs;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebAPI.Controllers;
@@ -10,43 +11,39 @@ namespace WebAPI.Controllers;
 public class CommentsController : ControllerBase
 {
     private readonly ICommentRepository commentRepo;
-    private readonly IUserRepository userRepo;
 
-    public CommentsController(ICommentRepository commentRepo, IUserRepository userRepo)
+    public CommentsController(ICommentRepository commentRepo)
     {
         this.commentRepo = commentRepo;
-        this.userRepo = userRepo;
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<CommentDto>> GetComments(
+    public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments(
         [FromQuery] int? userId,
         [FromQuery] string? userName,
         [FromQuery] int? postId)
     {
         IQueryable<Comment> comments = commentRepo.GetMany();
-        Dictionary<int, string> userNames = GetUserNames();
 
         if (userId != null)
             comments = comments.Where(c => c.UserId == userId);
 
         if (!string.IsNullOrWhiteSpace(userName))
-        {
-            List<int> matchingUserIds = userNames
-                .Where(u => u.Value.ToLower().Contains(userName.ToLower()))
-                .Select(u => u.Key)
-                .ToList();
-
-            comments = comments.Where(c => matchingUserIds.Contains(c.UserId));
-        }
+            comments = comments.Where(c => c.User.UserName.ToLower().Contains(userName.ToLower()));
 
         if (postId != null)
             comments = comments.Where(c => c.PostId == postId);
 
-        List<CommentDto> result = comments
-            .ToList()
-            .Select(c => ToCommentDto(c, userNames))
-            .ToList();
+        List<CommentDto> result = await comments
+            .Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Body = c.Body,
+                UserId = c.UserId,
+                PostId = c.PostId,
+                AuthorUserName = c.User.UserName
+            })
+            .ToListAsync();
 
         return Ok(result);
     }
@@ -54,15 +51,22 @@ public class CommentsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<CommentDto>> GetComment(int id)
     {
-        try
-        {
-            Comment comment = await commentRepo.GetSingleAsync(id);
-            return Ok(ToCommentDto(comment, GetUserNames()));
-        }
-        catch (InvalidOperationException e)
-        {
-            return NotFound(e.Message);
-        }
+        CommentDto? dto = await commentRepo.GetMany()
+            .Where(c => c.Id == id)
+            .Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Body = c.Body,
+                UserId = c.UserId,
+                PostId = c.PostId,
+                AuthorUserName = c.User.UserName
+            })
+            .FirstOrDefaultAsync();
+
+        if (dto == null)
+            return NotFound($"Comment with id {id} not found");
+
+        return Ok(dto);
     }
 
     [HttpPut("{id:int}")]
@@ -93,23 +97,5 @@ public class CommentsController : ControllerBase
         {
             return NotFound(e.Message);
         }
-    }
-
-
-    private Dictionary<int, string> GetUserNames()
-    {
-        return userRepo.GetMany().ToDictionary(u => u.Id, u => u.UserName);
-    }
-
-    private static CommentDto ToCommentDto(Comment c, Dictionary<int, string> userNames)
-    {
-        return new CommentDto
-        {
-            Id = c.Id,
-            Body = c.Body,
-            UserId = c.UserId,
-            PostId = c.PostId,
-            AuthorUserName = userNames.GetValueOrDefault(c.UserId, "Unknown")
-        };
     }
 }
