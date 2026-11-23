@@ -55,35 +55,38 @@ public class PostsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<PostDto>> GetPost(int id, [FromQuery] bool includeComments = false)
     {
-        PostDto? dto = await postRepo.GetMany()
+        IQueryable<Post> queryForPost = postRepo
+            .GetMany()
             .Where(p => p.Id == id)
-            .Select(p => new PostDto
+            .Include(p => p.User);
+
+        if (includeComments)
+        {
+            queryForPost = queryForPost.Include(p => p.Comments).ThenInclude(c => c.User);
+        }
+
+        PostDto? dto = await queryForPost.Select(post => new PostDto
             {
-                Id = p.Id,
-                Title = p.Title,
-                Body = p.Body,
-                UserId = p.UserId,
-                AuthorUserName = p.User.UserName
+                Id = post.Id,
+                Title = post.Title,
+                Body = post.Body,
+                UserId = post.UserId,
+                AuthorUserName = post.User.UserName,
+                Comments = includeComments
+                    ? post.Comments.Select(c => new CommentDto
+                    {
+                        Id = c.Id,
+                        Body = c.Body,
+                        UserId = c.UserId,
+                        PostId = c.PostId,
+                        AuthorUserName = c.User.UserName
+                    }).ToList()
+                    : new()
             })
             .FirstOrDefaultAsync();
 
         if (dto == null)
             return NotFound($"Post with id {id} not found");
-
-        if (includeComments)
-        {
-            dto.Comments = await commentRepo.GetMany()
-                .Where(c => c.PostId == id)
-                .Select(c => new CommentDto
-                {
-                    Id = c.Id,
-                    Body = c.Body,
-                    UserId = c.UserId,
-                    PostId = c.PostId,
-                    AuthorUserName = c.User.UserName
-                })
-                .ToListAsync();
-        }
 
         return Ok(dto);
     }
